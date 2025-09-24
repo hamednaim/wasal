@@ -1,0 +1,175 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ajouter-trajet",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook Chauffeur",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        -640
+      ],
+      "id": "30de57d2-3461-4cfe-aec1-02e437552071",
+      "webhookId": "63f71b87-a864-434a-9556-39d52c0fa476"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19yAwqC9651ZBPL4jbjsrABYUHb5URUrffJrbqR039ME",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19yAwqC9651ZBPL4jbjsrABYUHb5URUrffJrbqR039ME/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "departure",
+              "displayName": "departure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "arrival",
+              "displayName": "arrival",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "driver",
+              "displayName": "driver",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "name": "Ajouter Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -976,
+        -640
+      ],
+      "id": "6060858c-62c6-4c8e-915d-d256a2cb5b59",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gkr73XIUgrfYMg2M",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "name": "Réponse API1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -784,
+        -640
+      ],
+      "id": "a5fa1e3d-56cb-48db-afa4-520668e75078"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Formatter Trajet - lecture robuste du webhook\n// Supporte payload sous $json.body (webhook) ou direct $json\n\n// Récupérer la source : preferer body si présent\nconst raw = $json.body ?? $json;\n\n// Normaliser / supporter variantes de clés\nconst departure = raw.departure ?? raw.depart ?? raw.dept ?? '';\nconst arrival   = raw.arrival   ?? raw.arrivee ?? raw.arr ?? '';\nconst date      = raw.date ?? '';\nconst time      = raw.time ?? raw.heure ?? '';\nconst driver    = raw.driver ?? raw.nom ?? '';\nconst phone     = String(raw.phone ?? raw.telephone ?? raw.tel ?? '');\nconst seats     = String(raw.seats ?? raw.places ?? raw.nbPlaces ?? '');\nconst price     = String(raw.price ?? raw.prix ?? '');\nconst comment   = raw.comment ?? raw.commentaire ?? '';\n\n// Retourner l'objet formaté\nreturn [{\n  json: {\n    departure,\n    arrival,\n    date,\n    time,\n    driver,\n    phone,\n    seats,\n    price,\n    comment,\n    created_at: new Date().toISOString()\n  }\n}];\n"
+      },
+      "name": "Formatter Trajet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -432
+      ],
+      "id": "e982940c-8e64-4422-b9d6-d61a1c0b897f"
+    }
+  ],
+  "connections": {
+    "Webhook Chauffeur": {
+      "main": [
+        [
+          {
+            "node": "Formatter Trajet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajouter Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Réponse API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatter Trajet": {
+      "main": [
+        [
+          {
+            "node": "Ajouter Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b3281b1e86729c6caaa4dd45570bb3f7c8dc6aea653410bcbe83dce4980da848"
+  }
+}
