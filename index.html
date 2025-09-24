@@ -184,9 +184,15 @@
 
         .results {
             margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #f0f0f0;
+            padding: 30px;
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
             display: none;
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .results.show {
@@ -351,7 +357,7 @@
 
         .mode-switch {
             background: rgba(255, 255, 255, 0.2);
-            padding: 8px;
+            padding: 4px;
             border-radius: 50px;
             display: flex;
             align-items: center;
@@ -361,10 +367,10 @@
         }
 
         .mode-option {
-            padding: 12px 25px;
-            border-radius: 40px;
+            padding: 14px 30px;
+            border-radius: 46px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -373,18 +379,20 @@
             font-size: 1em;
             border: none;
             background: transparent;
+            position: relative;
+            z-index: 1;
         }
 
-        .mode-option:hover {
+        .mode-option:hover:not(.active) {
             color: white;
-            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.1);
         }
 
         .mode-option.active {
             background: white;
             color: #667eea;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transform: scale(1.05);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15), 0 2px 8px rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
         }
 
         .mode-option .icon {
@@ -495,11 +503,11 @@
             }
 
             .mode-switch {
-                padding: 6px;
+                padding: 4px;
             }
 
             .mode-option {
-                padding: 10px 20px;
+                padding: 12px 24px;
                 font-size: 0.9em;
             }
 
@@ -655,11 +663,12 @@
                     ❌ Erreur lors de la recherche. Veuillez réessayer.
                 </div>
             </form>
-
-            <div class="results" id="searchResults">
-                <div id="resultsList"></div>
-            </div>
         </div>
+    </div>
+
+    <!-- Zone de résultats commune - en dehors des cartes -->
+    <div class="results" id="searchResults">
+        <div id="resultsList"></div>
     </div>
 
     <!-- Lien contact admin -->
@@ -677,7 +686,20 @@
             e.preventDefault();
             
             const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
+            const rawData = Object.fromEntries(formData);
+            
+            // 🎯 MAPPING vers les noms de colonnes Google Sheet
+            const data = {
+                driver: rawData.nom,           // nom -> driver
+                phone: rawData.telephone,      // telephone -> phone
+                departure: rawData.depart,     // depart -> departure
+                arrival: rawData.arrivee,      // arrivee -> arrival
+                date: rawData.date,            // date -> date (identique)
+                time: rawData.heure,           // heure -> time
+                seats: rawData.places,         // places -> seats
+                price: rawData.prix,           // prix -> price
+                comment: rawData.commentaire   // commentaire -> comment
+            };
             
             // Cacher les messages précédents
             document.getElementById('driverSuccess').classList.remove('show');
@@ -688,7 +710,7 @@
             e.target.querySelector('button[type="submit"]').disabled = true;
             
             try {
-                console.log('Envoi des données:', data);
+                console.log('Données mappées pour Google Sheet:', data);
                 
                 const response = await fetch(DRIVER_WEBHOOK, {
                     method: 'POST',
@@ -1055,11 +1077,9 @@
                 }, 100);
                 clientModeBtn.classList.add('active');
                 
-                // Masquer les résultats si ils sont affichés
-                const searchResults = document.getElementById('searchResults');
-                if (searchResults) {
-                    searchResults.classList.remove('show');
-                }
+                // 🎯 GARDONS LES RÉSULTATS ! Plus de masquage automatique
+                // Les résultats de recherche restent visibles même en mode chauffeur
+                
             } else if (mode === 'driver') {
                 // Afficher la carte chauffeur
                 setTimeout(() => {
@@ -1069,12 +1089,12 @@
                 driverModeBtn.classList.add('active');
             }
             
-            // Masquer tous les messages d'erreur et de succès
+            // Masquer seulement les messages d'erreur et de succès
             document.querySelectorAll('.error-message, .success-message').forEach(msg => {
                 msg.classList.remove('show');
             });
             
-            console.log(`Mode basculé vers: ${mode}`);
+            console.log(`Mode basculé vers: ${mode} - Résultats conservés`);
         }
 
         // Initialiser avec le mode client par défaut
