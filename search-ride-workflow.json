@@ -1,0 +1,223 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chercher-trajet",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        32
+      ],
+      "id": "f6b5a58c-d197-4756-bd6c-25e07c2e8493",
+      "webhookId": "2276f3b5-800b-4c4c-becd-508454c00000"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Tu es un assistant pour une app de covoiturage tunisienne.\n\nExtrait ces informations du texte de l'utilisateur :\n- departure : ville de départ (en français ou arabe tunisien)\n- arrival : ville d'arrivée (en français ou arabe tunisien)  \n- date : date du trajet (format yyyy-mm-dd si mentionnée, sinon null)\n\nRETOURNE UNIQUEMENT UN JSON VALIDE avec ces 3 clés, sans aucun texte supplémentaire.\n\nConvertis les variantes dialectales en noms standards :\n- tounes/tunes → tunis\n- tozer/touzeur → tozeur\n- soussa/sousa → sousse\n- safakes/sfekes → sfax\n- qabis → gabes\n- mestir → monastir\n- kairawan → kairouan\n- banzart → bizerte\n\nExemples :\n- \"n7eb nemchy mn tunis l tozer\" → {\"departure\": \"tunis\", \"arrival\": \"tozeur\", \"date\": null}\n- \"trajet de Sfax vers Sousse demain\" → {\"departure\": \"sfax\", \"arrival\": \"sousse\", \"date\": null}\n- \"bech nemchi mel tounes lel soussa\" → {\"departure\": \"tunis\", \"arrival\": \"sousse\", \"date\": null}\n\nTexte utilisateur : {{$json[\"body\"][\"recherche\"]}}",
+        "batching": {}
+      },
+      "name": "Extraire Infos LLM",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -288,
+        -64
+      ],
+      "id": "7566cb5c-522b-49ce-817c-d86650cc9802"
+    },
+    {
+      "parameters": {
+        "jsCode": "// === PRÉPARER LES CRITÈRES DE RECHERCHE ===\n\nconst llmText = $input.first().json.text;\nlet searchCriteria = {};\n\ntry {\n  // Parser le JSON du LLM\n  searchCriteria = JSON.parse(llmText);\n  console.log(\"✅ Critères extraits:\", searchCriteria);\n} catch (error) {\n  console.log(\"❌ Erreur parsing:\", error.message);\n  return [{\n    json: {\n      error: true,\n      message: \"Impossible de comprendre la recherche\"\n    }\n  }];\n}\n\n// Passer les critères pour le prochain nœud\n// On les met dans des champs avec préfixe SEARCH_ pour les distinguer\nreturn [{\n  json: {\n    SEARCH_DEPARTURE: searchCriteria.departure || '',\n    SEARCH_ARRIVAL: searchCriteria.arrival || '',\n    SEARCH_DATE: searchCriteria.date || null,\n    SEARCH_ACTIVE: true\n  }\n}];"
+      },
+      "name": "Préparer Critères",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        96
+      ],
+      "id": "9edc7ab8-159a-4bc7-9ea9-f7915c8e293c"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "mode": "id",
+          "value": "19yAwqC9651ZBPL4jbjsrABYUHb5URUrffJrbqR039ME"
+        },
+        "sheetName": {
+          "mode": "list",
+          "value": "gid=0"
+        },
+        "options": {}
+      },
+      "name": "Lire Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -320,
+        288
+      ],
+      "id": "1e494039-8f19-4757-ae8f-45137375eec7",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gkr73XIUgrfYMg2M",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// === FILTRAGE DES TRAJETS ===\n\nconsole.log(\"\\n========== FILTRAGE DES TRAJETS ==========\");\nconsole.log(\"Nombre d'items reçus:\", $input.all().length);\n\n// Le premier item contient les critères de recherche\nconst firstItem = $input.first().json;\nconsole.log(\"\\nPremier item (critères):\", firstItem);\n\n// Extraire les critères de recherche\nlet searchCriteria = {\n  departure: '',\n  arrival: '',\n  date: null\n};\n\n// Chercher les critères avec le préfixe SEARCH_\nif (firstItem.SEARCH_ACTIVE) {\n  searchCriteria.departure = firstItem.SEARCH_DEPARTURE || '';\n  searchCriteria.arrival = firstItem.SEARCH_ARRIVAL || '';\n  searchCriteria.date = firstItem.SEARCH_DATE || null;\n  console.log(\"✅ Critères trouvés avec SEARCH_\");\n} else {\n  console.log(\"❌ Pas de critères SEARCH_ trouvés, recherche abandonnée\");\n  return [{\n    json: {\n      success: false,\n      found: false,\n      message: \"Erreur: critères de recherche non trouvés\"\n    }\n  }];\n}\n\nconsole.log(\"\\n🎯 Critères de recherche:\");\nconsole.log(`  Départ demandé: \"${searchCriteria.departure}\"`);\nconsole.log(`  Arrivée demandée: \"${searchCriteria.arrival}\"`);\nconsole.log(`  Date: ${searchCriteria.date || 'non spécifiée'}`);\n\n// Récupérer tous les trajets (en excluant le premier item qui contient les critères)\nconst allRides = $input.all().slice(1);\nconsole.log(`\\n📊 Nombre de trajets à analyser: ${allRides.length}`);\n\nif (allRides.length === 0) {\n  return [{\n    json: {\n      success: false,\n      found: false,\n      message: \"Aucun trajet dans la base de données\"\n    }\n  }];\n}\n\n// Fonction de normalisation\nfunction normalizeCity(city) {\n  if (!city) return '';\n  return String(city)\n    .toLowerCase()\n    .trim()\n    .normalize('NFD')\n    .replace(/[\\u0300-\\u036f]/g, '') // Enlever accents\n    .replace(/[-_\\s]+/g, '') // Enlever espaces\n    .replace(/[^a-z0-9]/g, ''); // Garder lettres/chiffres\n}\n\n// Fonction de comparaison de villes\nfunction citiesMatch(rideCity, searchCity) {\n  // Si pas de critère de recherche, on ne filtre pas sur ce champ\n  if (!searchCity || searchCity === '') {\n    console.log(`      → Pas de filtre sur ce champ`);\n    return true;\n  }\n  \n  // Si la ville du trajet est vide, pas de match\n  if (!rideCity) {\n    console.log(`      → Ville du trajet vide = pas de match`);\n    return false;\n  }\n  \n  const norm1 = normalizeCity(rideCity);\n  const norm2 = normalizeCity(searchCity);\n  \n  console.log(`      Comparaison: \"${norm1}\" vs \"${norm2}\"`);\n  \n  // Match exact\n  if (norm1 === norm2) {\n    console.log(`      → Match exact ✅`);\n    return true;\n  }\n  \n  // L'un contient l'autre\n  if (norm1.includes(norm2) || norm2.includes(norm1)) {\n    console.log(`      → Match par inclusion ✅`);\n    return true;\n  }\n  \n  // Variantes tunisiennes\n  const cityGroups = [\n    ['tunis', 'tounes', 'tunes'],\n    ['tozeur', 'tozer', 'touzeur'],\n    ['sousse', 'soussa', 'sousa'],\n    ['sfax', 'safakes', 'sfekes'],\n    ['gabes', 'qabis'],\n    ['monastir', 'mestir'],\n    ['kairouan', 'kairawan'],\n    ['bizerte', 'banzart'],\n    ['kef', 'elkef', 'lekef'],\n    ['mahdia', 'mehdia']\n  ];\n  \n  for (const group of cityGroups) {\n    const in1 = group.some(v => v === norm1 || norm1.includes(v));\n    const in2 = group.some(v => v === norm2 || norm2.includes(v));\n    if (in1 && in2) {\n      console.log(`      → Match par variante tunisienne ✅`);\n      return true;\n    }\n  }\n  \n  console.log(`      → Pas de match ❌`);\n  return false;\n}\n\n// FILTRER LES TRAJETS\nconsole.log(\"\\n🔍 ANALYSE DÉTAILLÉE DES TRAJETS:\");\nconsole.log(\"==================================\\n\");\n\nconst foundRides = [];\nconst rejectedRides = [];\n\nfor (let i = 0; i < allRides.length; i++) {\n  const ride = allRides[i].json;\n  \n  // Extraire les infos du trajet\n  const rideDeparture = ride.departure || ride.Departure || '';\n  const rideArrival = ride.arrival || ride.Arrival || '';\n  const rideDate = ride.date || ride.Date || null;\n  \n  console.log(`📍 Trajet ${i + 1}: ${rideDeparture} → ${rideArrival}`);\n  console.log(`   Date: ${rideDate || 'non spécifiée'}`);\n  console.log(`   Conducteur: ${ride.driver || 'inconnu'}`);\n  \n  // Vérifier le départ\n  console.log(`\\n   🔸 Vérification DÉPART:`);\n  const departureOk = citiesMatch(rideDeparture, searchCriteria.departure);\n  \n  // Vérifier l'arrivée\n  console.log(`\\n   🔸 Vérification ARRIVÉE:`);\n  const arrivalOk = citiesMatch(rideArrival, searchCriteria.arrival);\n  \n  // Vérifier la date si spécifiée\n  let dateOk = true;\n  if (searchCriteria.date && rideDate) {\n    dateOk = (rideDate === searchCriteria.date);\n    console.log(`\\n   🔸 Vérification DATE:`);\n    console.log(`      ${rideDate} vs ${searchCriteria.date} = ${dateOk ? '✅' : '❌'}`);\n  }\n  \n  // Décision finale\n  console.log(`\\n   📊 BILAN:`);\n  console.log(`      - Départ: ${departureOk ? '✅' : '❌'}`);\n  console.log(`      - Arrivée: ${arrivalOk ? '✅' : '❌'}`);\n  console.log(`      - Date: ${dateOk ? '✅' : '❌'}`);\n  \n  if (departureOk && arrivalOk && dateOk) {\n    console.log(`\\n   ✅✅✅ TRAJET RETENU ✅✅✅\\n`);\n    foundRides.push(ride);\n  } else {\n    console.log(`\\n   ❌❌❌ TRAJET ÉCARTÉ ❌❌❌\\n`);\n    rejectedRides.push(ride);\n  }\n  \n  console.log(\"   ════════════════════════════════\\n\");\n}\n\nconsole.log(\"\\n📊 RÉSULTAT FINAL:\");\nconsole.log(`   ✅ Trajets trouvés: ${foundRides.length}`);\nconsole.log(`   ❌ Trajets écartés: ${rejectedRides.length}`);\nconsole.log(`   📋 Total analysé: ${allRides.length}`);\n\n// RETOURNER LE RÉSULTAT\nif (foundRides.length === 0) {\n  // Montrer les trajets disponibles pour debug\n  const availableRoutes = rejectedRides.slice(0, 5).map(r => ({\n    depart: r.departure || r.Departure,\n    arrivee: r.arrival || r.Arrival,\n    date: r.date || r.Date\n  }));\n  \n  return [{\n    json: {\n      success: true,\n      found: false,\n      message: `Aucun trajet trouvé de ${searchCriteria.departure} vers ${searchCriteria.arrival}`,\n      recherche: searchCriteria,\n      nombre_total_trajets: rejectedRides.length,\n      trajets_disponibles: availableRoutes,\n      conseil: \"Vérifiez l'orthographe des villes ou essayez une autre route\"\n    }\n  }];\n}\n\n// Retourner uniquement les trajets qui correspondent\nconsole.log(\"\\n✅ Retour des trajets filtrés:\");\nfoundRides.forEach((ride, i) => {\n  console.log(`   ${i + 1}. ${ride.departure} → ${ride.arrival} (${ride.date})`);\n});\n\nreturn [{\n  json: {\n    success: true,\n    found: true,\n    message: `${foundRides.length} trajet(s) trouvé(s)`,\n    count: foundRides.length,\n    recherche: searchCriteria,\n    rides: foundRides\n  }\n}];"
+      },
+      "name": "Filtrer Trajets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        32
+      ],
+      "id": "37c3ad05-8bfb-43d7-a016-98b4388ef00c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        464,
+        32
+      ],
+      "id": "33359400-3189-4436-b48e-3b16e37358ba",
+      "name": "Réponse API"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        80
+      ],
+      "id": "82fc267b-88a6-4380-8891-580ddeeac761",
+      "name": "Groq Model",
+      "credentials": {
+        "groqApi": {
+          "id": "tk1Z6r0mfYgcuqLA",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        96,
+        368
+      ],
+      "id": "5ab27769-524a-449a-9e6c-a7bfaa5bfdf8",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extraire Infos LLM",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Lire Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire Infos LLM": {
+      "main": [
+        [
+          {
+            "node": "Préparer Critères",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer Critères": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filtrer Trajets": {
+      "main": [
+        [
+          {
+            "node": "Réponse API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extraire Infos LLM",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Filtrer Trajets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "b3281b1e86729c6caaa4dd45570bb3f7c8dc6aea653410bcbe83dce4980da848"
+  }
+}
