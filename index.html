@@ -92,6 +92,7 @@
 
         .form-group {
             margin-bottom: 20px;
+            position: relative;
         }
 
         label {
@@ -162,24 +163,36 @@
             position: absolute;
             right: 10px;
             top: 35px;
-            background: #ff4444;
+            background: linear-gradient(135deg, #ff6b6b, #ff4757);
             color: white;
             border: none;
             border-radius: 50%;
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            box-shadow: 0 3px 10px rgba(255, 71, 87, 0.3);
         }
 
         .mic-button:hover {
-            background: #ff6666;
+            background: linear-gradient(135deg, #ff4757, #ff3838);
             transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4);
         }
 
         .mic-button.recording {
             animation: recordPulse 1s infinite;
-            background: #ff0000;
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+        }
+
+        .mic-button svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
         }
 
         .results {
@@ -193,6 +206,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             backdrop-filter: blur(10px);
+            position: relative;
         }
 
         .results.show {
@@ -200,9 +214,36 @@
             animation: fadeIn 0.5s ease;
         }
 
+        .close-results {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 300;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .close-results:hover {
+            background: #fff;
+            color: #333;
+            border-color: #999;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+
         .result-item {
             background: #f8f9fa;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             margin-bottom: 15px;
             border-left: 4px solid #667eea;
@@ -235,27 +276,76 @@
             font-weight: bold;
         }
 
+        .price.no-price {
+            background: #ff9800;
+        }
+
         .route {
             color: #666;
             margin: 5px 0;
         }
 
+        .comment-box {
+            display: inline-block;
+            background: #fff3cd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #ffc107;
+            font-style: italic;
+            color: #856404;
+            font-size: 0.95em;
+        }
+
+        .contact-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
         .contact-btn {
             background: #25d366;
             color: white;
-            padding: 8px 20px;
-            border-radius: 5px;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            margin-top: 10px;
+            justify-content: center;
+            gap: 8px;
             transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            flex: 0 0 auto;
+            min-width: 120px;
         }
 
         .contact-btn:hover {
             background: #128c7e;
             transform: scale(1.05);
+        }
+
+        .contact-btn.call {
+            background: #2196f3;
+        }
+
+        .contact-btn.call:hover {
+            background: #1976d2;
+        }
+
+        .contact-btn.copy {
+            background: #9c27b0;
+        }
+
+        .contact-btn.copy:hover {
+            background: #7b1fa2;
+        }
+
+        .contact-btn.copy.copied {
+            background: #4caf50;
         }
 
         .success-message {
@@ -408,26 +498,58 @@
             animation: fadeInUp 0.6s ease;
         }
 
-        .search-info {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 4px solid #2196f3;
+        .email-info-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 5px;
         }
 
-        .search-info .search-details {
-            color: #1976d2;
-            font-weight: 600;
-        }
-
-        .results-count {
-            background: #4caf50;
+        .email-info-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: #667eea;
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
-            font-weight: bold;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            cursor: help;
+            vertical-align: middle;
+        }
+
+        .email-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 100;
+            max-width: 250px;
+            white-space: normal;
+            margin-bottom: 5px;
+        }
+
+        .email-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+        }
+
+        .email-info-container:hover .email-tooltip {
+            opacity: 1;
         }
 
         @keyframes fadeInDown {
@@ -518,6 +640,18 @@
             .tagline {
                 font-size: 1em;
             }
+
+            .contact-buttons {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+
+            .contact-btn {
+                flex: 1;
+                min-width: auto;
+                padding: 10px 12px;
+                font-size: 0.85em;
+            }
         }
     </style>
 </head>
@@ -556,6 +690,17 @@
                 </div>
 
                 <div class="form-group">
+                    <label>
+                        Email
+                        <span class="email-info-container">
+                            <span class="email-info-icon">?</span>
+                            <span class="email-tooltip">Email de gestion pour modifier ou supprimer votre trajet ultérieurement</span>
+                        </span>
+                    </label>
+                    <input type="email" name="email" placeholder="votre.email@example.com" required>
+                </div>
+
+                <div class="form-group">
                     <label>Numéro de téléphone</label>
                     <input type="tel" name="telephone" placeholder="98 765 432" required>
                 </div>
@@ -563,7 +708,7 @@
                 <div class="input-group">
                     <div class="form-group">
                         <label>Ville de départ</label>
-                        <input type="text" name="depart" placeholder="Tunis" required>
+                        <input type="text" name="depart" placeholder="Tunis" autocomplete="off" required>
                         <div class="cities-suggestion">
                             <span class="city-chip" onclick="setCity(this, 'depart')">Tunis</span>
                             <span class="city-chip" onclick="setCity(this, 'depart')">Sfax</span>
@@ -573,12 +718,12 @@
                     </div>
                     <div class="form-group">
                         <label>Ville d'arrivée</label>
-                        <input type="text" name="arrivee" placeholder="Sousse" required>
+                        <input type="text" name="arrivee" placeholder="Sousse" autocomplete="off" required>
                         <div class="cities-suggestion">
                             <span class="city-chip" onclick="setCity(this, 'arrivee')">Gabès</span>
                             <span class="city-chip" onclick="setCity(this, 'arrivee')">Tozeur</span>
-                            <span class="city-chip" onclick="setCity(this, 'arrivee')">Hammamet</span>
-                            <span class="city-chip" onclick="setCity(this, 'arrivee')">Djerba</span>
+                            <span class="city-chip" onclick="setCity(this, 'arrivee')">Monastir</span>
+                            <span class="city-chip" onclick="setCity(this, 'arrivee')">Nabeul</span>
                         </div>
                     </div>
                 </div>
@@ -590,7 +735,7 @@
                     </div>
                     <div class="form-group">
                         <label>Heure</label>
-                        <input type="time" name="heure" required>
+                        <input type="time" name="heure" value="11:00" required>
                     </div>
                 </div>
 
@@ -646,7 +791,10 @@
                     <label>Décrivez votre trajet (en français ou dialecte)</label>
                     <textarea name="recherche" id="searchInput" placeholder="Exemple: bech nemchi ghoudwa l sousse min tunis&#10;ou: Je cherche un trajet Tunis-Sfax pour demain&#10;ou: نحب نمشي لتوزر الجمعة الجاية" required></textarea>
                     <button type="button" class="mic-button" id="micButton" onclick="toggleRecording()">
-                        🎤
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                        </svg>
                     </button>
                 </div>
 
@@ -668,6 +816,7 @@
 
     <!-- Zone de résultats commune - en dehors des cartes -->
     <div class="results" id="searchResults">
+        <button class="close-results" onclick="closeResults()">×</button>
         <div id="resultsList"></div>
     </div>
 
@@ -681,6 +830,137 @@
         const DRIVER_WEBHOOK = 'https://naimhamed.ddns.net/webhook/ajouter-trajet';
         const CLIENT_WEBHOOK = 'https://naimhamed.ddns.net/webhook/chercher-trajet';
 
+        // Liste des villes tunisiennes pour validation et autocomplete
+        const VILLES_TUNISIENNES = [
+            'Tunis', 'Sfax', 'Sousse', 'Gabès', 'Bizerte', 'Kairouan', 
+            'Gafsa', 'Monastir', 'Ben Arous', 'Kasserine', 'Médenine', 
+            'Nabeul', 'Tataouine', 'Béja', 'Jendouba', 'Mahdia', 
+            'Sidi Bouzid', 'Tozeur', 'Siliana', 'Kebili', 'Ariana', 
+            'Manouba', 'Zaghouan', 'Kef'
+        ];
+
+        // Fonction d'autocomplete personnalisée
+        function setupAutocomplete() {
+            const inputs = document.querySelectorAll('input[name="depart"], input[name="arrivee"]');
+            
+            inputs.forEach(input => {
+                let currentFocus = -1;
+                
+                input.addEventListener('input', function() {
+                    const val = this.value;
+                    closeAllLists();
+                    if (!val) return false;
+                    
+                    currentFocus = -1;
+                    const list = document.createElement('div');
+                    list.setAttribute('id', this.id + '-autocomplete-list');
+                    list.setAttribute('class', 'autocomplete-items');
+                    list.style.cssText = `
+                        position: absolute;
+                        border: 1px solid #d4d4d4;
+                        border-bottom: none;
+                        border-top: none;
+                        z-index: 99;
+                        top: 100%;
+                        left: 0;
+                        right: 0;
+                        background: white;
+                        border-radius: 0 0 10px 10px;
+                        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                        max-height: 200px;
+                        overflow-y: auto;
+                    `;
+                    this.parentNode.appendChild(list);
+                    
+                    let hasMatch = false;
+                    VILLES_TUNISIENNES.forEach(ville => {
+                        if (ville.substr(0, val.length).toUpperCase() === val.toUpperCase()) {
+                            hasMatch = true;
+                            const item = document.createElement('div');
+                            item.style.cssText = `
+                                padding: 10px;
+                                cursor: pointer;
+                                border-bottom: 1px solid #eee;
+                                transition: background 0.2s;
+                            `;
+                            item.innerHTML = `<strong>${ville.substr(0, val.length)}</strong>${ville.substr(val.length)}`;
+                            item.addEventListener('click', function() {
+                                input.value = ville;
+                                closeAllLists();
+                                validateCity(input);
+                            });
+                            item.addEventListener('mouseover', function() {
+                                this.style.background = '#e9ecef';
+                            });
+                            item.addEventListener('mouseout', function() {
+                                this.style.background = 'white';
+                            });
+                            list.appendChild(item);
+                        }
+                    });
+                    
+                    if (!hasMatch) {
+                        const noMatch = document.createElement('div');
+                        noMatch.style.cssText = `
+                            padding: 10px;
+                            color: #999;
+                            font-style: italic;
+                        `;
+                        noMatch.textContent = 'Aucune ville correspondante';
+                        list.appendChild(noMatch);
+                    }
+                });
+                
+                function closeAllLists(elmnt) {
+                    const items = document.getElementsByClassName('autocomplete-items');
+                    for (let i = 0; i < items.length; i++) {
+                        if (elmnt !== items[i] && elmnt !== input) {
+                            items[i].parentNode.removeChild(items[i]);
+                        }
+                    }
+                }
+                
+                document.addEventListener('click', function (e) {
+                    closeAllLists(e.target);
+                });
+            });
+        }
+
+        // Fonction pour fermer les résultats
+        function closeResults() {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.classList.remove('show');
+        }
+
+        // Validation des villes tunisiennes
+        function validateCity(input) {
+            const city = input.value.trim();
+            const isValid = VILLES_TUNISIENNES.some(v => 
+                v.toLowerCase() === city.toLowerCase()
+            );
+            
+            if (!isValid && city !== '') {
+                input.setCustomValidity('Veuillez sélectionner une ville tunisienne valide');
+                input.style.borderColor = '#f44336';
+            } else {
+                input.setCustomValidity('');
+                input.style.borderColor = '';
+            }
+            return isValid;
+        }
+
+        // Initialiser l'autocomplete au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            setupAutocomplete();
+            
+            const villeInputs = document.querySelectorAll('input[name="depart"], input[name="arrivee"]');
+            villeInputs.forEach(input => {
+                input.addEventListener('blur', () => {
+                    setTimeout(() => validateCity(input), 200);
+                });
+            });
+        });
+
         // Gestion du formulaire chauffeur
         document.getElementById('driverForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -690,20 +970,30 @@
             
             // 🎯 MAPPING vers les noms de colonnes Google Sheet
             const data = {
-                driver: rawData.nom,           // nom -> driver
-                phone: rawData.telephone,      // telephone -> phone
-                departure: rawData.depart,     // depart -> departure
-                arrival: rawData.arrivee,      // arrivee -> arrival
-                date: rawData.date,            // date -> date (identique)
-                time: rawData.heure,           // heure -> time
-                seats: rawData.places,         // places -> seats
-                price: rawData.prix,           // prix -> price
-                comment: rawData.commentaire   // commentaire -> comment
+                driver: rawData.nom,           
+                phone: rawData.telephone,      
+                email: rawData.email,          // Nouveau champ email
+                departure: rawData.depart,     
+                arrival: rawData.arrivee,      
+                date: rawData.date,            
+                time: rawData.heure,           
+                seats: rawData.places,         
+                price: rawData.prix,           
+                comment: rawData.commentaire   
             };
             
             // Cacher les messages précédents
             document.getElementById('driverSuccess').classList.remove('show');
             document.getElementById('driverError').classList.remove('show');
+            
+            // Valider les villes avant l'envoi
+            const departInput = e.target.querySelector('input[name="depart"]');
+            const arriveeInput = e.target.querySelector('input[name="arrivee"]');
+            
+            if (!validateCity(departInput) || !validateCity(arriveeInput)) {
+                alert('Veuillez sélectionner des villes tunisiennes valides');
+                return;
+            }
             
             // Afficher le loading
             e.target.querySelector('.loading').classList.add('show');
@@ -730,10 +1020,12 @@
                     document.getElementById('driverSuccess').classList.add('show');
                     e.target.reset();
                     
-                    // Réinitialiser la date
+                    // Réinitialiser la date et l'heure
                     const dateInput = e.target.querySelector('input[type="date"]');
+                    const timeInput = e.target.querySelector('input[type="time"]');
                     const today = new Date().toISOString().split('T')[0];
                     dateInput.value = today;
+                    timeInput.value = '11:00'; // Remettre l'heure par défaut
                     
                     // Cacher le message après 5 secondes
                     setTimeout(() => {
@@ -801,7 +1093,23 @@
             }
         });
 
-        // Affichage des résultats de recherche - ADAPTÉ AU NOUVEAU FORMAT API
+        // Fonction pour copier le numéro de téléphone
+        function copyPhone(phone, button) {
+            navigator.clipboard.writeText(phone).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✅ Copié !';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('Erreur lors de la copie:', err);
+                alert('Numéro: ' + phone);
+            });
+        }
+
+        // Affichage des résultats de recherche - AMÉLIORÉ
         function displayResults(data) {
             const resultsDiv = document.getElementById('searchResults');
             const resultsList = document.getElementById('resultsList');
@@ -834,95 +1142,49 @@
                 
                 // Afficher chaque trajet
                 data.rides.forEach(ride => {
+                    const phoneClean = ride.phone.replace(/\s/g, '');
+                    const priceDisplay = ride.price ? `${ride.price} DT` : 'Contacter pour prix';
+                    const priceClass = ride.price ? 'price' : 'price no-price';
+                    
                     html += `
                         <div class="result-item">
                             <div class="result-header">
                                 <span class="driver-name">👤 ${ride.driver}</span>
-                                <span class="price">Contactez pour prix</span>
+                                <span class="${priceClass}">${priceDisplay}</span>
                             </div>
                             <div class="route">
                                 📍 ${ride.departure} → ${ride.arrival}
                             </div>
                             <div class="route">
-                                📅 ${formatDate(ride.date)}
+                                📅 ${formatDate(ride.date)}${ride.time ? ' à ' + ride.time : ''}
                             </div>
-                            ${ride.row_number ? `
-                                <div class="route" style="font-size: 0.9em; color: #888;">
-                                    📋 Référence: #${ride.row_number}
+                            ${ride.seats ? `
+                                <div class="route">
+                                    💺 ${ride.seats} place(s) disponible(s)
                                 </div>
                             ` : ''}
-                            <a href="https://wa.me/216${ride.phone}?text=Bonjour, je suis intéressé par votre trajet ${ride.departure} - ${ride.arrival} du ${formatDate(ride.date)}" 
-                               class="contact-btn" target="_blank">
-                                💬 Contacter via WhatsApp
-                            </a>
+                            ${ride.comment ? `
+                                <div style="margin: 10px 0;">
+                                    <span class="comment-box">💬 ${ride.comment}</span>
+                                </div>
+                            ` : ''}
+                            <div class="contact-buttons">
+                                <a href="https://wa.me/216${phoneClean}?text=Bonjour, je suis intéressé par votre trajet ${ride.departure} - ${ride.arrival} du ${formatDate(ride.date)}" 
+                                   class="contact-btn" target="_blank">
+                                    💬 WhatsApp
+                                </a>
+                                <a href="tel:+216${phoneClean}" 
+                                   class="contact-btn call">
+                                    📞 Appeler
+                                </a>
+                                <button onclick="copyPhone('${phoneClean}', this)" 
+                                        class="contact-btn copy">
+                                    📋 Copier numéro
+                                </button>
+                            </div>
                         </div>
                     `;
                 });
-            }
-            // Format de compatibilité avec l'ancien système (data.trajets_trouves)
-            else if (data.trajets_trouves && data.trajets_trouves.length > 0) {
-                html += `
-                    <h3 style="margin-bottom: 15px; color: #333;">Trajets disponibles 🎯</h3>
-                `;
-                
-                html += data.trajets_trouves.map(trajet => `
-                    <div class="result-item">
-                        <div class="result-header">
-                            <span class="driver-name">👤 ${trajet.nom}</span>
-                            <span class="price">${trajet.prix} DT</span>
-                        </div>
-                        <div class="route">
-                            📍 ${trajet.depart} → ${trajet.arrivee}
-                        </div>
-                        <div class="route">
-                            📅 ${trajet.date} à ${trajet.heure}
-                        </div>
-                        <div class="route">
-                            👺 ${trajet.places} place(s) disponible(s)
-                        </div>
-                        ${trajet.commentaire ? `
-                            <div class="route" style="font-style: italic; color: #888;">
-                                💬 ${trajet.commentaire}
-                            </div>
-                        ` : ''}
-                        <a href="https://wa.me/216${trajet.telephone}?text=Bonjour, je suis intéressé par votre trajet ${trajet.depart} - ${trajet.arrivee} du ${trajet.date}" 
-                           class="contact-btn" target="_blank">
-                            💬 Contacter via WhatsApp
-                        </a>
-                    </div>
-                `).join('');
-            }
-            // Format simple avec un seul trajet (legacy)
-            else if (data.departure && data.arrival && data.driver) {
-                html += `
-                    <h3 style="margin-bottom: 15px; color: #333;">Trajet disponible 🎯</h3>
-                    <div class="result-item">
-                        <div class="result-header">
-                            <span class="driver-name">👤 ${data.driver}</span>
-                            <span class="price">${data.price || 'Contactez pour prix'}</span>
-                        </div>
-                        <div class="route">
-                            📍 ${data.departure} → ${data.arrival}
-                        </div>
-                        <div class="route">
-                            📅 ${data.date}${data.time ? ' à ' + data.time : ''}
-                        </div>
-                        ${data.seats ? `
-                            <div class="route">
-                                👺 ${data.seats} place(s) disponible(s)
-                            </div>
-                        ` : ''}
-                        ${data.comment ? `
-                            <div class="route" style="font-style: italic; color: #888;">
-                                💬 ${data.comment}
-                            </div>
-                        ` : ''}
-                        <a href="https://wa.me/216${data.phone}?text=Bonjour, je suis intéressé par votre trajet ${data.departure} - ${data.arrival} du ${data.date}" 
-                           class="contact-btn" target="_blank">
-                            💬 Contacter via WhatsApp
-                        </a>
-                    </div>
-                `;
             }
             // Aucun trajet trouvé
             else {
@@ -981,7 +1243,7 @@
             input.value = chip.textContent;
         }
 
-        // Reconnaissance vocale (optionnel)
+        // Reconnaissance vocale (améliorée)
         let recognition;
         let isRecording = false;
 
@@ -1021,7 +1283,11 @@
                 recognition.start();
                 isRecording = true;
                 micButton.classList.add('recording');
-                micButton.textContent = '⏹️';
+                micButton.innerHTML = `
+                    <svg viewBox="0 0 24 24">
+                        <rect x="9" y="9" width="6" height="6" rx="1"/>
+                    </svg>
+                `;
             } else {
                 stopRecording();
             }
@@ -1034,7 +1300,12 @@
             }
             isRecording = false;
             micButton.classList.remove('recording');
-            micButton.textContent = '🎤';
+            micButton.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            `;
         }
 
         // Définir la date minimum à aujourd'hui
@@ -1044,6 +1315,12 @@
                 const today = new Date().toISOString().split('T')[0];
                 dateInput.min = today;
                 dateInput.value = today;
+            }
+            
+            // Définir l'heure par défaut à 11:00
+            const timeInput = document.querySelector('input[type="time"]');
+            if (timeInput && !timeInput.value) {
+                timeInput.value = '11:00';
             }
         });
 
@@ -1076,9 +1353,6 @@
                     clientCard.classList.add('show');
                 }, 100);
                 clientModeBtn.classList.add('active');
-                
-                // 🎯 GARDONS LES RÉSULTATS ! Plus de masquage automatique
-                // Les résultats de recherche restent visibles même en mode chauffeur
                 
             } else if (mode === 'driver') {
                 // Afficher la carte chauffeur
